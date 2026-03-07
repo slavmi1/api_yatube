@@ -1,7 +1,9 @@
-from rest_framework import viewsets, mixins
+from rest_framework import viewsets
 from rest_framework.exceptions import PermissionDenied
 from posts.models import Group, Post, Comment
-from posts.serializers import GroupSerializer, PostSerializer, CommentSerializer
+from posts.serializers import (
+    GroupSerializer, PostSerializer, CommentSerializer
+)
 
 
 class PostViewSet(viewsets.ModelViewSet):
