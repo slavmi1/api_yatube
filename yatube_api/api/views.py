@@ -1,5 +1,5 @@
 from rest_framework import viewsets
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import NotFound, PermissionDenied
 from posts.models import Group, Post, Comment
 from posts.serializers import (
     GroupSerializer, PostSerializer, CommentSerializer
@@ -30,7 +30,6 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class CommentViewSet(viewsets.ModelViewSet):
-    queryset = Comment.objects.all()
     serializer_class = CommentSerializer
 
     def get_queryset(self):
@@ -38,9 +37,14 @@ class CommentViewSet(viewsets.ModelViewSet):
         return Comment.objects.filter(post_id=post_id)
 
     def perform_create(self, serializer):
+        post_id = self.kwargs.get('post_id')
+        try:
+            post = Post.objects.get(id=post_id)
+        except Post.DoesNotExist:
+            raise NotFound('Пост не найден')
         serializer.save(
             author=self.request.user,
-            post_id=self.kwargs.get('post_id')
+            post=post
         )
 
     def perform_update(self, serializer):
