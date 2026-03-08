@@ -40,17 +40,8 @@ class CommentSerializer(serializers.ModelSerializer):
         slug_field='username',
         default=serializers.CurrentUserDefault()
     )
-    # post = serializers.PrimaryKeyRelatedField(
-    #     read_only=True,
-    #     pk_field=serializers.IntegerField()
-    # )
 
     class Meta:
         model = Comment
         fields = ('id', 'author', 'post', 'text', 'created')
-        extra_kwargs = {
-            'post': {
-                'required': False,
-                'read_only': False
-            }
-        }
+        read_only_fields = ('author', 'post')

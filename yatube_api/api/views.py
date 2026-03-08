@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.exceptions import NotFound, PermissionDenied
 from posts.models import Group, Post, Comment
@@ -32,16 +33,18 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
 
-    def get_queryset(self):
+    def get_post(self):
         post_id = self.kwargs.get('post_id')
-        return Comment.objects.filter(post_id=post_id)
+        if not post_id:
+            raise NotFound('Не указан ID поста')
+        return get_object_or_404(Post, id=post_id)
+
+    def get_queryset(self):
+        post = self.get_post()
+        return post.comments.all()
 
     def perform_create(self, serializer):
-        post_id = self.kwargs.get('post_id')
-        try:
-            post = Post.objects.get(id=post_id)
-        except Post.DoesNotExist:
-            raise NotFound('Пост не найден')
+        post = self.get_post()
         serializer.save(
             author=self.request.user,
             post=post
